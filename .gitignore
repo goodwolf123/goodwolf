@@ -1,0 +1,30 @@
+# 虚拟环境
+.venv/
+venv/
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# 工具缓存
+.screenshots/
+
+# 回测/因子检验输出报告
+output/
+
+# 行情与因子缓存数据（可由代码重建）
+data/
+
+# 环境与密钥
+.env
+.env.*
+*.key
+secrets.*
+
+# IDE / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

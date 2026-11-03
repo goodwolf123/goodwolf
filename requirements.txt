@@ -1,0 +1,8 @@
+pandas>=2.0
+numpy>=1.24
+pyyaml>=6.0
+pyarrow>=14.0
+matplotlib>=3.7
+pytest>=7.0
+# 可选：免费行情源。离线/网络不可用时自动回退到内置 demo 数据，不装也能跑。
+# akshare>=1.12

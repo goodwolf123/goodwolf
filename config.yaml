@@ -1,0 +1,70 @@
+# ============ 数据层 ============
+data:
+  provider: demo            # demo | akshare
+  cache_dir: data/cache     # 本地 Parquet 缓存目录（含交易日历缓存）
+  demo_file: data/demo.parquet   # demo 数据集（首次运行自动生成，schema 升级自动重建）
+  universe: []              # 股票池；空列表 = demo 默认池（主板/创业板/科创板混合）
+  demo_n: 10                # universe 为空时生成的标的数
+  start: "2022-01-01"
+  end: "2024-12-31"
+  adjust: hfq               # hfq 后复权 | qfq 前复权 | none 不复权
+
+# ============ 股票池过滤 ============
+universe_filter:
+  min_list_days: 60         # 剔除次新股（上市不足 N 天）
+  exclude_st: true          # 剔除 ST
+  min_amount: 0             # 近 20 日日均成交额下限（元），0 = 不过滤
+  min_float_mktcap: 0       # 流通市值下限（元），0 = 不过滤
+
+# ============ 回测引擎 ============
+backtest:
+  initial_cash: 1000000
+  rebalance: weekly         # daily | weekly | monthly
+  commission: 0.0003        # 佣金费率（双边）
+  min_commission: 5.0       # 单笔最低佣金（元）
+  stamp_tax: 0.0005         # 印花税（仅卖出）
+  transfer_fee: 0.00002     # 过户费（双边）
+  slippage: 0.001           # 滑点（按成交额比例）
+  benchmark: auto           # auto = 股票池等权合成基准
+
+# ============ 组合与风控约束 ============
+portfolio:
+  max_positions: 8
+  max_weight_per_stock: 0.25
+  max_weight_per_industry: 1.0
+
+# ============ 策略 ============
+strategy:
+  name: momentum            # momentum | ma_cross，或自定义注册名
+  params:
+    lookback: 20
+    top_n: 5
+
+# ============ 清洗管线（因子预处理，按顺序执行，可开关）============
+cleaning:
+  steps:
+    - name: drop_missing_rate
+      params: {max_missing: 0.4}
+    - name: drop_untradable
+      params: {remove_suspended: true, remove_limit_locked: true, remove_st: true, min_list_days: 60}
+    - name: fillna
+      enabled: false        # 因子检验通常保留 NaN（视为无覆盖），默认关闭
+      params: {method: cross_section_mean}
+    - name: winsorize
+      params: {method: mad, n: 5}
+    - name: standardize
+      params: {method: zscore}
+    - name: neutralize
+      params: {industry: true, size: true}
+
+# ============ 因子检验 ============
+factor_test:
+  horizon: 5                # 前瞻收益周期（交易日）
+  quantiles: 5              # 分层数（五分位）
+  ic_method: rank           # rank(Spearman) | pearson
+  output_dir: output
+  params: {}                # 因子参数，如 {lookback: 60, skip: 5}
+
+# ============ 报告 ============
+report:
+  output: output/report.html
