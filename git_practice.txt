@@ -1,0 +1,4 @@
+My First Git Practice
+
+I am learning Git Bash.
+I can use add, commit and push.
